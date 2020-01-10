@@ -12,7 +12,11 @@
       "libs/arrive/arrive.min.js",
       "content.js"
     ],
-    "matches": ["https://tc.tradersclub.com.br/tradersclub/channels/*"]
+    "matches": [
+      "https://tc.tradersclub.com.br/tradersclub/channels/*", 
+      "https://tc.tradersclub.com.br/*"
+    ],
+    "run_at": "document_end"
   }],
   "background": {
     "scripts": ["background.js"],

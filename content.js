@@ -130,7 +130,7 @@ document.arrive('.render-search-box', {}, function() {
   image.src = SANITA_AVATAR;
   button.appendChild(image);
   button.onclick = fetchPosts;
-  searchBoxContainer.insertBefore(button, searchBoxContainer.firstChild);
+  searchBoxContainer.appendChild(button);
 });
 
 // Add a listener to close the sidebar if user presses ESC whilst the sidebar is open
