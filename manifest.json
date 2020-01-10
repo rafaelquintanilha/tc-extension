@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "TC Extension",
+  "version": "0.0.1",
+  "description": "Enhance the TC experience!",
+  "content_scripts": [{
+    "css": [
+      "styles.css"
+    ],
+    "js": [
+      "libs/moment/moment.min.js",
+      "libs/arrive/arrive.min.js",
+      "content.js"
+    ],
+    "matches": ["https://tc.tradersclub.com.br/tradersclub/channels/*"]
+  }],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  }
+}
