@@ -3,6 +3,7 @@ const SANITA_AVATAR = "https://tc.tradersclub.com.br/api/v4/users/30f961e345f489
 
 let postsBySanita;
 let tickerKey = "";
+let isFetchingPosts = false;
 
 const fetchResource = (input, init) => {
   return new Promise((resolve, reject) => {
@@ -34,32 +35,7 @@ const onFilterChange = e => {
 };
 
 const fetchPosts = async () => {
-  const response = await fetchResource(`https://tc.tradersclub.com.br/api/v4/channels/ggn6rok18igcpm67n8iomdkb8h/posts?page=0&per_page=150`, {
-      method: "GET",
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin':'*',
-        'Authorization': `Bearer ${localStorage.getItem("token")}`
-      },
-    });
-
-  const { order, posts } = await response.json();
-  postsBySanita = []
-  const tickers = [];
-  order.forEach(postId => {
-    const post = posts[postId];
-
-    // Only add posts from Sanita, that are of type "ticker" and that hadn't been added yet
-    if ( 
-      post.user_id === SANITA_ID && 
-      post.type === "ticker" && 
-      !tickers.includes(post.ticker) 
-    ) {
-      postsBySanita.push(post);
-      tickers.push(post.ticker);
-    }
-  });
+  if ( isFetchingPosts ) return;
   
   // Create and add container and sidebar
   const container = document.querySelector('#channel-main');
@@ -74,6 +50,7 @@ const fetchPosts = async () => {
   close.classList = "sanita-close"
   const icon = document.createElement('i');
   icon.classList = "tcnews icon-close";
+  icon.title = "Fechar";
   close.appendChild(icon)
   close.onclick = closeSidebar;
   sidebar.appendChild(close);
@@ -102,6 +79,37 @@ const fetchPosts = async () => {
   container.appendChild(sidebar)
   container.insertAdjacentElement("beforeend", sidebar);
   input.focus();
+
+  isFetchingPosts = true;
+  const response = await fetchResource(`https://tc.tradersclub.com.br/api/v4/channels/ggn6rok18igcpm67n8iomdkb8h/posts?page=0&per_page=150`, {
+      method: "GET",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin':'*',
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+      },
+    });
+
+  const { order, posts } = await response.json();
+
+  isFetchingPosts = false;
+
+  postsBySanita = []
+  const tickers = [];
+  order.forEach(postId => {
+    const post = posts[postId];
+
+    // Only add posts from Sanita, that are of type "ticker" and that hadn't been added yet
+    if ( 
+      post.user_id === SANITA_ID && 
+      post.type === "ticker" && 
+      !tickers.includes(post.ticker) 
+    ) {
+      postsBySanita.push(post);
+      tickers.push(post.ticker);
+    }
+  });
 
   // Render list of tickers
   renderList();

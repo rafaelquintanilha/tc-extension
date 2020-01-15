@@ -36,11 +36,12 @@
 }
 
 .sanita-info {
-  width: 350px;
+  width: 300px;
 }
 
 .sanita-sidebar hr {
   border-color: rgba(0, 0, 0, 0.1) !important;
+  width: 300px;
 }
 
 .sanita-sidebar input {
@@ -65,8 +66,8 @@
   background: none;
   border: none;
   padding: 8px;
-  position: absolute;
-  right: 0;
+  position: fixed;
+  right: 10px;
   margin-top: 6px;
 }
 
