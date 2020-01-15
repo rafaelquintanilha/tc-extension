@@ -1,6 +1,9 @@
 const SANITA_ID = "30f961e345f4894df1bd0e961a";
 const SANITA_AVATAR = "https://tc.tradersclub.com.br/api/v4/users/30f961e345f4894df1bd0e961a/image?_=1561491021660";
 
+let postsBySanita;
+let tickerKey = "";
+
 const fetchResource = (input, init) => {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage({input, init}, messageResponse => {
@@ -22,10 +25,16 @@ const createPermalink = postId => `https://tc.tradersclub.com.br/tradersclub/pl/
 const closeSidebar = () => {
   document.querySelector(".sanita-sidebar").remove();
   document.querySelector(".sanita-overlay").remove();
+  tickerKey = "";
 }
 
+const onFilterChange = e => {
+  tickerKey = e.target.value;
+  renderList();
+};
+
 const fetchPosts = async () => {
-  const response = await fetchResource(`https://tc.tradersclub.com.br/api/v4/channels/ggn6rok18igcpm67n8iomdkb8h/posts?page=0&per_page=100`, {
+  const response = await fetchResource(`https://tc.tradersclub.com.br/api/v4/channels/ggn6rok18igcpm67n8iomdkb8h/posts?page=0&per_page=150`, {
       method: "GET",
       headers: {
         'Accept': 'application/json',
@@ -36,7 +45,7 @@ const fetchPosts = async () => {
     });
 
   const { order, posts } = await response.json();
-  const postsBySanita = []
+  postsBySanita = []
   const tickers = [];
   order.forEach(postId => {
     const post = posts[postId];
@@ -74,6 +83,7 @@ const fetchPosts = async () => {
   header.textContent = "Últimas Análises";
   sidebar.appendChild(header)
   const paragraph = document.createElement('p');
+  paragraph.classList = "sanita-info";
   const strong = document.createElement("strong");
   strong.textContent = "Pesquise antes de solicitar uma nova análise.";
   paragraph.textContent = "Clique no ticker para ver a análise mais recente sobre o ativo ou passe o mouse sobre a linha para ler o comentário. ";
@@ -82,9 +92,39 @@ const fetchPosts = async () => {
   const rule = document.createElement('hr');
   sidebar.appendChild(rule);
 
-  // Add list of tickers
+  // Add input
+  const input = document.createElement('input');
+  input.placeholder = "Filtre pelo ticker. Ex: PETR"
+  input.oninput = onFilterChange;
+  sidebar.appendChild(input);
+
+  // Add elements to the DOM
+  container.appendChild(sidebar)
+  container.insertAdjacentElement("beforeend", sidebar);
+  input.focus();
+
+  // Render list of tickers
+  renderList();
+}
+
+const renderList = () => {
+  // Filter posts based on the key
+  const posts = tickerKey === "" 
+    ? postsBySanita 
+    : postsBySanita.filter(({ticker}) => ticker.toLowerCase().includes(tickerKey.toLowerCase()));
+
+  // If no post match the key, display no results message
+  if ( posts.length === 0 ) {
+    const noResults = document.createElement('p');
+    noResults.classList = "sanita-no-results";
+    noResults.textContent = "Sem resultados.";
+    updateSidebar(noResults);
+    return;
+  }
+
+  // Create list of tickers
   const list = document.createElement('ul');
-  postsBySanita.forEach((post) => {
+  posts.forEach((post) => {
     const item = document.createElement('li');
     const div = document.createElement('div');
     div.title = post.message;
@@ -111,15 +151,19 @@ const fetchPosts = async () => {
 
     span.textContent = text;
     div.appendChild(span);
-    item.appendChild(div)
-    list.appendChild(item)
+    item.appendChild(div);
+    list.appendChild(item);
   })
-  sidebar.appendChild(list)
-
-  // Add elements to the DOM
-  container.appendChild(sidebar)
-  container.insertAdjacentElement("beforeend", sidebar);
+  
+  // Add list to sidebar
+  updateSidebar(list);
 }
+
+const updateSidebar = node => {
+  document.querySelector('.sanita-sidebar ul') && document.querySelector('.sanita-sidebar ul').remove();
+  document.querySelector('.sanita-no-results') && document.querySelector('.sanita-no-results').remove();
+  document.querySelector('.sanita-sidebar').appendChild(node);
+};
 
 // Create launch button only after the header is rendered
 document.arrive('.render-search-box', {}, function() {

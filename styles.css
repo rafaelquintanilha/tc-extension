@@ -35,8 +35,26 @@
   box-sizing: border-box;
 }
 
+.sanita-info {
+  width: 350px;
+}
+
 .sanita-sidebar hr {
   border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.sanita-sidebar input {
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  height: 30px;
+}
+
+.sanita-no-results {
+  font-size: 14px;
+  color: #666;
+  font-style: normal;
 }
 
 .sanita-sidebar h1 {
